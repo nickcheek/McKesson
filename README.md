@@ -66,7 +66,20 @@ $order = new Mckesson($identity, $secret, $account_number, $b2b_key);
 $result = $order->order($customer, $order) // or whatever you're searching
 var_dump($result);
 ```
+### Using the Builder
+```php
+//You can use the builder to make it easy to build up items and customers.
+$builder = new Mckesson($identity, $secret, $account_number, $b2b_key);
+$items = $builder->addItem(2, '123456','12.00','BX');
+$items = $builder->addItem(1, '23939291','23.00','EA');
+$items = $builder->addItem(19, '8328237','83.00','CS');
+$customer = $builder->addCustomer(12345,'23.00','nick cheek','201 MyStreet Ave', '', 'Little Rock', 'AR',72204,'','',123456778);
 
+//afterwards, you can order like so:
+$order = $builder->order($customer, $items);
+
+
+```
 ### Testing
 
 ```bash

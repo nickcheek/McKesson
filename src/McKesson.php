@@ -2,7 +2,7 @@
 
 namespace Nickcheek\McKesson;
 
-class McKesson
+class McKesson extends Builder
 {
     protected string $identity;
     protected string $secret;

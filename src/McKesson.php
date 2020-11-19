@@ -53,21 +53,21 @@ class McKesson
         $to         = $head->addChild('From');
         $credDomain = $to->addChild('Credential');
         $credDomain->addAttribute('domain', 'NetworkID');
-        $identFrom = $credDomain->addChild('Identity', '10001');
+        $credDomain->addChild('Identity', '10001');
 
         //Setup the From section
         $from     = $head->addChild('To');
         $mcdomain = $from->addChild('Credential');
         $mcdomain->addAttribute('domain', 'DUNS');
-        $identTo = $mcdomain->addChild('Identity', '023904428');
+        $mcdomain->addChild('Identity', '023904428');
 
         //Setup Credentials
         $sender     = $head->addChild('Sender');
         $credDomain = $sender->addChild('Credential');
         $credDomain->addAttribute('domain', 'NetworkID');
-        $creds     = $credDomain->addChild('Identity', $this->identity);
-        $creds     = $credDomain->addChild('SharedSecret', $this->secret);
-        $useragent = $sender->addChild('UserAgent', $data['userAgent'] ?? 'Mckesson PHP Library');
+        $credDomain->addChild('Identity', $this->identity);
+        $credDomain->addChild('SharedSecret', $this->secret);
+        $sender->addChild('UserAgent', $data['userAgent'] ?? 'Mckesson PHP Library');
 
         //Setup the request
         $req = $xml->addChild('Request');

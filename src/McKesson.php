@@ -36,7 +36,6 @@ class McKesson
 
     function SetupOrderXML(iterable $data, iterable $order): string
     {
-
         $dataKeys = ['orderId', 'total', 'customerName', 'address1', 'city', 'state', 'zip', 'customerId'];
         if (!$this->checkArray($data, $dataKeys)) {
             throw new \Exception('The data array is missing keys');
@@ -142,7 +141,6 @@ class McKesson
             //Unit of Measure (Required)
             $dtPr = $itDt->addChild('UnitOfMeasure', $i['uom'] ?? '');
         }
-
         return $xml->asXML();
     }
 

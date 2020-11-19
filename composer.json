@@ -1,0 +1,43 @@
+{
+    "name": "nickcheek/mckesson",
+    "description": "Mckesson API Package",
+    "keywords": [
+        "nickcheek",
+        "mckesson"
+    ],
+    "homepage": "https://github.com/nickcheek/mckesson",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Nicholas Cheek",
+            "email": "nick@nicholascheek.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9",
+        "symfony/var-dumper": "^5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nickcheek\\McKesson\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nickcheek\\McKesson\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

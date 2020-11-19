@@ -41,9 +41,12 @@ class McKesson
             throw new \Exception('The data array is missing keys');
         }
         $orderKeys = ['qty', 'sku', 'price', 'uom'];
-        if (!$this->checkArray($order, $orderKeys)) {
-            throw new \Exception('The items array is missing keys');
+        foreach($order as $o) {
+            if (!$this->checkArray($o, $orderKeys)) {
+                throw new \Exception('The items array is missing keys');
+            }
         }
+       
 
         $xml = new \SimpleXMLElement('<cXML/>', LIBXML_NOERROR);
         $xml->addAttribute('payloadID', $data['orderId'] ?? '');

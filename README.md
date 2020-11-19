@@ -42,19 +42,28 @@ $customer = [
     'state' => 'AR', 
     'zip' => 72019, 
     'phone' => '5011234567', //optional
-    'email' => 'nick@nicholascheek.com' //optional (*i think*)
+    'email' => 'nick@nicholascheek.com', //optional (*i think*)
     'customerId' => 12345
     ];
 
-$items = [
-    'qty' => 2, 
-    'sku' => 123456, 
-    'price' => '12.00', 
+$item1 = [
+    'qty' => 2,
+    'sku' => 123456,
+    'price' => '12.00',
     'uom' => 'BX'
-    ];
+];
+
+$item2 = [
+    'qty' => 2,
+    'sku' => 78901,
+    'price' => '12.00',
+    'uom' => 'BX'
+];
+
+$order = [$item1, $item2];
 
 $order = new Mckesson($identity, $secret, $account_number, $b2b_key);
-$result = $order->order('978841') // or whatever you're searching
+$result = $order->order($customer, $order) // or whatever you're searching
 var_dump($result);
 ```
 

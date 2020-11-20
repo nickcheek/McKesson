@@ -19,7 +19,7 @@ class McKesson extends Builder
         $this->mode = $deployment_mode;
     }
 
-    public function setupItemXML(string $itemId, string $type = null): string
+    public function setupItemXML(string $itemId, ?string $type): string
     {
         $xml  = $this->credentials('Lookup');
         (!is_null($type)) ? $xml->addAttribute('itemType', $type) : null;
@@ -27,7 +27,7 @@ class McKesson extends Builder
         return $xml->asXML();
     }
 
-    function setupSearchXML(string $query, string $type = null,  string $refinement = null, int $node = null): string
+    function setupSearchXML(string $query, ?string $type,  ?string $refinement, ?int $node = null): string
     {
         $xml  = $this->credentials('Search');
         (!is_null($type)) ? $xml->addAttribute('itemType', $type) : null;
@@ -42,7 +42,7 @@ class McKesson extends Builder
         return $xml->asXML();
     }
 
-    function setupFeedXML(string $source, string $sourceType, int $feedId = null,  ?string $type, int $pageSize,  int $offset): string
+    function setupFeedXML(string $source, string $sourceType, ?int $feedId,  ?string $type, int $pageSize,  int $offset): string
     {
         $xml  = $this->credentials('Feed', $feedId);
         (!is_null($type)) ? $xml->addAttribute('itemType', $type) : null;
@@ -179,7 +179,7 @@ class McKesson extends Builder
         return $xml;
     }
 
-    function lookup(string $item, string $type = null): object
+    function lookup(string $item, ?string $type = null): object
     {
         $xml = $this->setupItemXML($item, $type);
         $url = curl_init('https://mms.mckesson.com/services/xml/' . $this->b2bkey . '/ItemLookup');
@@ -191,7 +191,7 @@ class McKesson extends Builder
         return $this->toObject($result);
     }
 
-    function search(string $item, string $type = null, string $refinement = null, int $node = null): object
+    function search(string $item, ?string $type = null, ?string $refinement = null, ?int $node = null): object
     {
         $xml = $this->setupSearchXML($item, $type,  $refinement, $node);
         $url = curl_init('https://mms.mckesson.com/services/xml/' . $this->b2bkey . '/ItemSearch');
@@ -203,7 +203,7 @@ class McKesson extends Builder
         return $this->toObject($result);
     }
 
-    function feed(string $source, string $sourceType = 'list', int $feedId = null, string $type = null, int $pageSize = 25, int $offset = 0): object
+    function feed(string $source, string $sourceType = 'list', ?int $feedId = null, ?string $type = null, int $pageSize = 25, int $offset = 0): object
     {
         $xml = $this->setupFeedXML($source, $sourceType, $feedId, $type, $pageSize,  $offset);
         $url = curl_init('https://mms.mckesson.com/services/xml/' . $this->b2bkey . '/ItemFeed');

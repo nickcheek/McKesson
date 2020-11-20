@@ -7,10 +7,6 @@ class Builder
 
     protected iterable $items;
 
-    public function __construct()
-    {
-    }
-
     public function addItem(int $qty, string $sku, string $price, string $uom): iterable
     {
         if (empty($this->items)) {

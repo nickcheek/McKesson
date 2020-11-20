@@ -8,6 +8,7 @@ class McKesson extends Builder
     protected string $secret;
     protected string $b2bkey;
     protected int $account;
+    protected iterable $items;
 
     public function __construct(string $identity, string $secret, int $account, string $b2bKey, string $deployment_mode = 'production')
     {
@@ -18,35 +19,54 @@ class McKesson extends Builder
         $this->mode = $deployment_mode;
     }
 
-    public function setupItemXML(string $itemId): string
+    public function setupItemXML(string $itemId, string $type = null): string
     {
         $xml  = $this->credentials('Lookup');
+        (!is_null($type)) ? $xml->addAttribute('itemType', $type) : null;
         $xml->addChild('ItemId', $itemId);
         return $xml->asXML();
     }
 
-    function setupSearchXML(string $query): string
+    function setupSearchXML(string $query, string $type = null,  string $refinement = null, int $node = null): string
     {
         $xml  = $this->credentials('Search');
+        (!is_null($type)) ? $xml->addAttribute('itemType', $type) : null;
+        (!is_null($refinement)) ? $xml->addAttribute('searchType', $refinement) : null;
         $search = $xml->addChild('Search');
         $query = $search->addChild('Query', $query);
         $query->addAttribute('by', 'keyword');
+        if (!is_null($node)) {
+            $browse = $search->addChild('BrowseNode');
+            $browse->addAttribute('id', $node);
+        }
+        return $xml->asXML();
+    }
+
+    function setupFeedXML(string $source, string $sourceType, int $feedId = null,  ?string $type, int $pageSize,  int $offset): string
+    {
+        $xml  = $this->credentials('Feed', $feedId);
+        (!is_null($type)) ? $xml->addAttribute('itemType', $type) : null;
+        $feed = $xml->addChild('Feed');
+        $search = $feed->addChild('Source', $source);
+        $search->addAttribute('type', $sourceType);
+        $feed->addChild('PageSize', $pageSize);
+        $feed->addChild('Offset', $offset);
         return $xml->asXML();
     }
 
     function SetupOrderXML(iterable $data, iterable $order): string
     {
+
         $dataKeys = ['orderId', 'total', 'customerName', 'address1', 'city', 'state', 'zip', 'customerId'];
         if (!$this->checkArray($data, $dataKeys)) {
             throw new \Exception('The data array is missing keys');
         }
         $orderKeys = ['qty', 'sku', 'price', 'uom'];
-        foreach($order as $o) {
+        foreach ($order as $o) {
             if (!$this->checkArray($o, $orderKeys)) {
                 throw new \Exception('The items array is missing keys');
             }
         }
-       
 
         $xml = new \SimpleXMLElement('<cXML/>', LIBXML_NOERROR);
         $xml->addAttribute('payloadID', $data['orderId'] ?? '');
@@ -56,21 +76,21 @@ class McKesson extends Builder
         $to         = $head->addChild('From');
         $credDomain = $to->addChild('Credential');
         $credDomain->addAttribute('domain', 'NetworkID');
-        $credDomain->addChild('Identity', '10001');
+        $identFrom = $credDomain->addChild('Identity', '10001');
 
         //Setup the From section
         $from     = $head->addChild('To');
         $mcdomain = $from->addChild('Credential');
         $mcdomain->addAttribute('domain', 'DUNS');
-        $mcdomain->addChild('Identity', '023904428');
+        $identTo = $mcdomain->addChild('Identity', '023904428');
 
         //Setup Credentials
         $sender     = $head->addChild('Sender');
         $credDomain = $sender->addChild('Credential');
         $credDomain->addAttribute('domain', 'NetworkID');
-        $credDomain->addChild('Identity', $this->identity);
-        $credDomain->addChild('SharedSecret', $this->secret);
-        $sender->addChild('UserAgent', $data['userAgent'] ?? 'Mckesson PHP Library');
+        $creds     = $credDomain->addChild('Identity', $this->identity);
+        $creds     = $credDomain->addChild('SharedSecret', $this->secret);
+        $useragent = $sender->addChild('UserAgent', $data['userAgent'] ?? 'Mckesson PHP Library');
 
         //Setup the request
         $req = $xml->addChild('Request');
@@ -144,10 +164,11 @@ class McKesson extends Builder
             //Unit of Measure (Required)
             $dtPr = $itDt->addChild('UnitOfMeasure', $i['uom'] ?? '');
         }
+
         return $xml->asXML();
     }
 
-    public function credentials($type): object
+    public function credentials(string $type): object
     {
         $xml  = new \SimpleXMLElement('<Item' . $type . 'Request/>');
         $creds = $xml->addChild('Credentials');
@@ -158,9 +179,9 @@ class McKesson extends Builder
         return $xml;
     }
 
-    function lookup(string $item): object
+    function lookup(string $item, string $type = null): object
     {
-        $xml = $this->setupItemXML($item);
+        $xml = $this->setupItemXML($item, $type);
         $url = curl_init('https://mms.mckesson.com/services/xml/' . $this->b2bkey . '/ItemLookup');
         curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($url, CURLOPT_POSTFIELDS, $xml);
@@ -170,9 +191,9 @@ class McKesson extends Builder
         return $this->toObject($result);
     }
 
-    function search($item): object
+    function search(string $item, string $type = null, string $refinement = null, int $node = null): object
     {
-        $xml = $this->setupSearchXML($item);
+        $xml = $this->setupSearchXML($item, $type,  $refinement, $node);
         $url = curl_init('https://mms.mckesson.com/services/xml/' . $this->b2bkey . '/ItemSearch');
         curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
         curl_setopt($url, CURLOPT_POSTFIELDS, $xml);
@@ -182,7 +203,19 @@ class McKesson extends Builder
         return $this->toObject($result);
     }
 
-    function order($data, $items): object
+    function feed(string $source, string $sourceType = 'list', int $feedId = null, string $type = null, int $pageSize = 25, int $offset = 0): object
+    {
+        $xml = $this->setupFeedXML($source, $sourceType, $feedId, $type, $pageSize,  $offset);
+        $url = curl_init('https://mms.mckesson.com/services/xml/' . $this->b2bkey . '/ItemFeed');
+        curl_setopt($url, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($url, CURLOPT_POSTFIELDS, $xml);
+        curl_setopt($url, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($url, CURLOPT_HEADER, false);
+        $result = curl_exec($url);
+        return $this->toObject($result);
+    }
+
+    function order(array $data, array $items): object
     {
         $xml = $this->SetupOrderXML($data, $items);
         $url = curl_init('https://mms.mckesson.com/services/b2b/' . $this->b2bkey . '/cxml');

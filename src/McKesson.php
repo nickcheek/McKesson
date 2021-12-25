@@ -120,7 +120,7 @@ class McKesson extends Builder
         $post->addChild('Street', ucwords($data['address1'] ?? ''));
         $post->addChild('Street', ucwords($data['address2'] ?? ''));
         $post->addChild('City', ucwords($data['city'] ?? ''));
-        $post->addChild('State', $data['state_code'] ?? '');
+        $post->addChild('State', $data['state'] ?? '');
         $post->addChild('PostalCode', $data['zip'] ?? '');
         $country = $post->addChild('Country', "United States");
         $country->addAttribute('isoCountryCode', 'US');

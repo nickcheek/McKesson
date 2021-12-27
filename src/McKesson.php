@@ -56,7 +56,6 @@ class McKesson extends Builder
 
     function SetupOrderXML(iterable $data, iterable $order): string
     {
-
         $dataKeys = ['orderId', 'total', 'customerName', 'address1', 'city', 'state', 'zip', 'customerId'];
         if (!$this->checkArray($data, $dataKeys)) {
             throw new \Exception('The data array is missing keys');
@@ -78,7 +77,7 @@ class McKesson extends Builder
         $credDomain->addAttribute('domain', 'NetworkID');
         $identFrom = $credDomain->addChild('Identity', '10001');
 
-        //Setup the From section
+        //Setup From section
         $from     = $head->addChild('To');
         $mcdomain = $from->addChild('Credential');
         $mcdomain->addAttribute('domain', 'DUNS');
@@ -92,7 +91,7 @@ class McKesson extends Builder
         $creds     = $credDomain->addChild('SharedSecret', $this->secret);
         $useragent = $sender->addChild('UserAgent', $data['userAgent'] ?? 'Mckesson PHP Library');
 
-        //Setup the request
+        //Setup Request
         $req = $xml->addChild('Request');
         $req->addAttribute('deploymentMode', $this->mode);
         $ordreq = $req->addChild('OrderRequest');
@@ -103,12 +102,12 @@ class McKesson extends Builder
         $oHead->addAttribute('orderDate', date('m.d.Y'));
         $oHead->addAttribute('type', 'new');
 
-        //Setup total
+        //Setup Total
         $total = $oHead->addChild('Total');
         $money = $total->addChild('Money', $data['total'] ?? '');
         $money->addAttribute('currency', 'USD');
 
-        //Setup Shipto section
+        //Setup ShipTo section
         $shto = $oHead->addChild('ShipTo');
         $sadd = $shto->addChild('Address');
         $sadd->addAttribute('isoCountryCode', 'US');
